@@ -23,11 +23,8 @@ impl Program {
                         path: file_path.to_string(),
                         size: file_size,
                     };
-                    file_info.print_file_info();
-                    return Ok(FileInfo {
-                        path: file_path.to_string(),
-                        size: file_size,
-                    });
+
+                    return Ok(file_info);
                 }
                 Err(_) => eprintln!("{}Failed to read file metadata", self.error_word),
             },
@@ -55,10 +52,12 @@ impl Program {
         println!("    wc_tool -h               Show this help message");
     }
 
-    fn handle_dir(&self, path: &str) -> Result<u64, std::io::Error> {
+    fn handle_dir(&self, path: &str) -> Result<DirInfo, std::io::Error> {
         let mut total_size: u64 = 0;
         let entries = std::fs::read_dir(path)?;
+        let mut count: usize = 0;
         for entry in entries {
+            count += 1;
             let entry = entry?;
             let entry_path = entry.path();
 
@@ -66,8 +65,8 @@ impl Program {
 
             if entry_path.is_dir() {
                 match self.handle_dir(&display) {
-                    Ok(size) => total_size += size,
-                    Err(_) => {}
+                    Ok(dir) => total_size += dir.size,
+                    Err(e) => println!("{}{}", self.error_word, e),
                 }
             } else if entry_path.is_file() {
                 match self.handle_path(&display) {
@@ -81,9 +80,10 @@ impl Program {
         let dir_info = DirInfo {
             path: path.to_string(),
             size: total_size,
+            entry_count: count,
         };
-        dir_info.print_dir_info();
-        Ok(total_size)
+
+        Ok(dir_info)
     }
 
     pub fn run(&self, args: Vec<String>) {
@@ -96,8 +96,8 @@ impl Program {
                     "-f" => {
                         if (i + 1) < args.len() {
                             match self.handle_path(&args[i + 1]) {
-                                Ok(_) => {
-                                    // Move to the file argument
+                                Ok(file) => {
+                                    file.print_file_info();
                                 }
                                 Err(e) => {
                                     eprintln!("{}{}", self.error_word, e);
@@ -111,7 +111,9 @@ impl Program {
                     "-d" => {
                         if (i + 1) < args.len() {
                             match self.handle_dir(&args[i + 1]) {
-                                Ok(_) => {}
+                                Ok(dir) => {
+                                    dir.print_dir_info();
+                                }
                                 Err(e) => eprintln!("{}{}", self.error_word, e),
                             }
                             i += 1;

@@ -5,6 +5,7 @@ const UNITS: &[&str] = &["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"
 pub struct DirInfo {
     pub path: String,
     pub size: u64,
+    pub entry_count: usize,
 }
 #[derive(Debug, Clone)]
 pub struct FileInfo {
@@ -28,12 +29,13 @@ impl DirInfo {
     pub fn print_dir_info(&self) {
         let (size_float, unit_idx) = format_size(self.size);
         println!(
-            "{} {} {} {:.2} {}",
+            "{} {} {} {:.2} {}, {} Entries",
             "📁".bright_yellow(),
             "Directory:".yellow(),
             self.path.blue().bold(),
             size_float,
-            UNITS[unit_idx].bright_green()
+            UNITS[unit_idx].bright_green(),
+            self.entry_count
         )
     }
 }
