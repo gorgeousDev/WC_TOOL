@@ -29,7 +29,6 @@ impl FileType {
         match path_obj.metadata() {
             Ok(metadata) => {
                 if read_content {
-                  
                     let mut content_str = String::new();
                     if let Ok(mut file) = File::open(path_obj) {
                         if file.read_to_string(&mut content_str).is_ok() {
@@ -45,7 +44,7 @@ impl FileType {
                             });
                         }
                     }
-            
+
                     return Some(FileType {
                         path: path.to_string(),
                         size: metadata.len(),
@@ -54,7 +53,6 @@ impl FileType {
                         character_count: 0,
                     });
                 } else {
-                    
                     return Some(FileType {
                         path: path.to_string(),
                         size: metadata.len(),
@@ -78,7 +76,7 @@ impl FileType {
     pub fn print_info(&self) {
         let (size_float, unit_idx) = crate::constants::format_size(self.size);
         println!(
-            "   {} {} {}: {:.2} {}",
+            "   {} {:<12} {}: {:.2} {}",
             "📄".bright_cyan(),
             "File:".cyan(),
             self.path.blue().bold(),

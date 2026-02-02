@@ -72,7 +72,7 @@ impl DirectoryType {
     pub fn print_dir_simple_info(&self) {
         let (size_float, unit_idx) = crate::constants::format_size(self.size);
         println!(
-            "{} {} {} {:.2} {}, {} Entries",
+            "{} {:<15} {} {:.2} {}, {} Entries",
             "📁".bright_yellow(),
             "Directory:".yellow(),
             self.path.blue().bold(),

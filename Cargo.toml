@@ -1,8 +1,9 @@
 [package]
-name = "wc_tool"
-version = "0.1.0"
+name = "wc"
+version = "1.0.0"
 edition = "2024"
-
+description = "Word and File Count Utility written in Rust"
+license = "MIT"
 [dependencies]
 colored = "3.0.0"
 ipipe = "0.11.7"
