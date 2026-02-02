@@ -1,4 +1,4 @@
-use std::{fs::File, io::Read, os::unix::fs::MetadataExt, path::Path};
+use std::{fs::File, io::Read, path::Path};
 
 use colored::Colorize;
 
@@ -24,42 +24,61 @@ pub fn count_characters(content: &str) -> usize {
 }
 
 impl FileType {
-    pub fn new(path: &str) -> Option<FileType> {
+    pub fn new(path: &str, read_content: bool) -> Option<FileType> {
         let path_obj = Path::new(path);
-        match File::open(path_obj) {
-            Ok(mut file) => match file.metadata() {
-                Ok(content) => {
+        match path_obj.metadata() {
+            Ok(metadata) => {
+                if read_content {
+                  
                     let mut content_str = String::new();
-                    match file.read_to_string(&mut content_str) {
-                        Ok(_) => {
+                    if let Ok(mut file) = File::open(path_obj) {
+                        if file.read_to_string(&mut content_str).is_ok() {
                             let words = count_words(&content_str);
                             let lines = count_lines(&content_str);
                             let chars = count_characters(&content_str);
                             return Some(FileType {
-                                path: String::from(path),
-                                size: content.size(),
+                                path: path.to_string(),
+                                size: metadata.len(),
                                 word_count: words,
                                 line_count: lines,
                                 character_count: chars,
                             });
                         }
-                        Err(_) => {
-                            return None;
-                        }
                     }
+            
+                    return Some(FileType {
+                        path: path.to_string(),
+                        size: metadata.len(),
+                        word_count: 0,
+                        line_count: 0,
+                        character_count: 0,
+                    });
+                } else {
+                    
+                    return Some(FileType {
+                        path: path.to_string(),
+                        size: metadata.len(),
+                        word_count: 0,
+                        line_count: 0,
+                        character_count: 0,
+                    });
                 }
-                Err(e) => {
-                    eprintln!("{} {}", "Error:".red().bold(), e);
-                    return None;
-                }
-            },
-            Err(_) => None,
+            }
+            Err(e) => {
+                eprintln!(
+                    "{} Cannot read file {:?}: {}",
+                    "ERROR:".red().bold(),
+                    path,
+                    e
+                );
+                None
+            }
         }
     }
     pub fn print_info(&self) {
         let (size_float, unit_idx) = crate::constants::format_size(self.size);
         println!(
-            "{} {} {}: {:.2} {}",
+            "   {} {} {}: {:.2} {}",
             "📄".bright_cyan(),
             "File:".cyan(),
             self.path.blue().bold(),
